@@ -32,18 +32,22 @@
 
       // Calculate total steps per week
       // d3.rollup groups the data by week and sums the steps for each week
+      // key is the week number and value is the total steps for that week
       const weekSteps = d3.rollup(
         data,
         v => d3.sum(v, d => +d.Schritte),
         d => d.Week
       );
+      // console.log("weekSteps", weekSteps);
 
       // Convert Map to array for easier processing
-      // returns an object with Week and TotalSteps properties
+      // returns an Array with objects. Every Object has Week and TotalSteps properties [{"Week": "18", "TotalSteps": 27133}, ...]
       const weekStepsArray = Array.from(weekSteps, ([Week, TotalSteps]) => ({ Week, TotalSteps }));
+      // console.log("weekStepsArray", weekStepsArray);
 
       // Create Week labels
       // new Set and map create an array of unique week labels
+      // just week numbers ["18", "19", "20", ...]
       const weeks = [...new Set(data.map(d => d.Week))];
 
       myChart.selectAll(".week-label")

@@ -1,144 +1,199 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SVG with D3</title>
-  <link rel="stylesheet" href="base.css" />
-  <link rel="stylesheet" href="custom.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&family=Suez+One&display=swap"
-    rel="stylesheet"
-  />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-</head>
-<body>
-  <h1>Daily Steps I Have Taken</h1>
-  <p>Since April 29, 2024, I've been tracking my daily steps to improve my health and stay active. Here are the details of my progress.</p>
-  <div id="my-svg-chart"></div>
-  <div class="tooltip" id="tooltip"></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SVG with D3</title>
+    <link rel="stylesheet" href="base.css" />
+    <link rel="stylesheet" href="custom.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&family=Suez+One&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  </head>
+  <body>
+    <h1>Daily Steps I Have Taken</h1>
+    <p>
+      Since April 29, 2024, I've been tracking my daily steps to improve my
+      health and stay active. Here are the details of my progress.
+    </p>
+    <div id="my-svg-chart"></div>
+    <div class="tooltip" id="tooltip"></div>
 
-  <script>
-    d3.csv("steps.csv").then((data) => {
-      // console.log(data);
+    <script>
+      d3.csv("steps.csv").then((data) => {
+        // console.log(data);
 
-      const myChart = d3
-        .select("#my-svg-chart")
-        .append("svg")
-        .attr("width", 640)  // Adjust width to make space for week labels and total steps
-        .attr("height", 840);  // Adjust height as needed
+        const myChart = d3
+          .select("#my-svg-chart")
+          .append("svg")
+          .attr("width", 640) // Adjust width to make space for week labels and total steps
+          .attr("height", 840); // Adjust height as needed
 
-      // Calculate total steps per week
-      // d3.rollup groups the data by week and sums the steps for each week
-      // key is the week number and value is the total steps for that week
-      const weekSteps = d3.rollup(
-        data,
-        v => d3.sum(v, d => +d.Schritte),
-        d => d.Week
-      );
-      // console.log("weekSteps", weekSteps);
+        // Calculate total steps per week
+        // d3.rollup groups the data by week and sums the steps for each week
+        // key is the week number and value is the total steps for that week
+        const weekSteps = d3.rollup(
+          data,
+          (v) => d3.sum(v, (d) => +d.Schritte),
+          (d) => d.Week
+        );
+        // console.log("weekSteps", weekSteps);
 
-      // Convert Map to array for easier processing
-      // returns an Array with objects. Every Object has Week and TotalSteps properties [{"Week": "18", "TotalSteps": 27133}, ...]
-      const weekStepsArray = Array.from(weekSteps, ([Week, TotalSteps]) => ({ Week, TotalSteps }));
-      // console.log("weekStepsArray", weekStepsArray);
+        // Convert Map to array for easier processing
+        // returns an Array with objects. Every Object has Week and TotalSteps properties [{"Week": "18", "TotalSteps": 27133}, ...]
+        const weekStepsArray = Array.from(weekSteps, ([Week, TotalSteps]) => ({
+          Week,
+          TotalSteps,
+        }));
+        // console.log("weekStepsArray", weekStepsArray);
 
-      // Create Week labels
-      // new Set and map create an array of unique week labels
-      // just week numbers ["18", "19", "20", ...]
-      const weeks = [...new Set(data.map(d => d.Week))];
+        // Create Week labels
+        // new Set and map create an array of unique week labels
+        // just week numbers ["18", "19", "20", ...]
+        const weeks = [...new Set(data.map((d) => d.Week))];
 
-      myChart.selectAll(".week-label")
-        .data(weeks)
-        .enter()
-        .append("text")
-        .attr("class", "week-label")
-        .attr("x", 10)
-        .attr("y", (d, i) => i * 70 + 35)  // Adjust the y position to align with circles
-        .text(d => `Week ${d}`)
-        .attr("font-family", "sans-serif")
-        .attr("font-size", "12px")
-        .attr("fill", "black");
+        myChart
+          .selectAll(".week-label")
+          .data(weeks)
+          .enter()
+          .append("text")
+          .attr("class", "week-label")
+          .attr("x", 10)
+          .attr("y", (d, i) => i * 70 + 35) // Adjust the y position to align with circles
+          .text((d) => `Week ${d}`)
+          .attr("font-family", "sans-serif")
+          .attr("font-size", "12px")
+          .attr("fill", "black");
 
-      const individualCharts = myChart
-        .selectAll("circle")
-        .data(data)
-        .join("circle");
+        const individualCharts = myChart
+          .selectAll("circle")
+          .data(data)
+          .join("circle");
 
-      const yellowTones = [
-        "#FFE462", "#FFD364", "#FFCC80", "#FFB74D", "#FFA726", 
-        "#FF9800", "#FB8C00", "#F57C00", "#EF6C00", "#E65100", 
-        "#BF360C",
-      ];
+        const yellowTones = [
+          "#FFE462",
+          "#FFD364",
+          "#FFCC80",
+          "#FFB74D",
+          "#FFA726",
+          "#FF9800",
+          "#FB8C00",
+          "#F57C00",
+          "#EF6C00",
+          "#E65100",
+          "#BF360C",
+        ];
 
-      const gridSize = 60, gap = 2, weekOffset = 90;  // Increase weekOffset to add margin-right for text
+        const gridSize = 60,
+          gap = 2,
+          weekOffset = 90; // Increase weekOffset to add margin-right for text
 
-      // Create a map to track y position for each week
-      const weekYPos = {};
-      weeks.forEach((week, i) => {
-        weekYPos[week] = i * 70 + gridSize / 2;  // Adjust the y position to align with circles
+        // Create a map to track y position for each week
+        const weekYPos = {};
+        weeks.forEach((week, i) => {
+          weekYPos[week] = i * 70 + gridSize / 2; // Adjust the y position to align with circles
+        });
+
+        individualCharts
+          .attr(
+            "cx",
+            (d, i) => (i % 7) * (gridSize + gap) + gridSize / 2 + weekOffset
+          )
+          .attr("cy", (d) => weekYPos[d.Week])
+          .attr("r", 0) // Start with radius 0 for animation
+          .style("fill", (d) => {
+            const categoryIndex = [
+              "0-2500",
+              "2501-5000",
+              "5001-7500",
+              "7501-10000",
+              "10001-12500",
+              "12501-15000",
+              "15001-17500",
+              "17501-20000",
+              "20001-22500",
+              "22501-25000",
+              "> 25000",
+            ].indexOf(d.Category);
+            return yellowTones[categoryIndex];
+          })
+          .transition() // Start the transition
+          .duration(1000) // Duration of 1 second
+          .attr("r", (d) => {
+            switch (d.Category) {
+              case "0-2500":
+                return 1 * 2.5;
+              case "2501-5000":
+                return 2 * 2.5;
+              case "5001-7500":
+                return 3 * 2.5;
+              case "7501-10000":
+                return 4 * 2.5;
+              case "10001-12500":
+                return 5 * 2.5;
+              case "12501-15000":
+                return 6 * 2.5;
+              case "15001-17500":
+                return 7 * 2.5;
+              case "17501-20000":
+                return 8 * 2.5;
+              case "20001-22500":
+                return 9 * 2.5;
+              case "22501-25000":
+                return 10 * 2.5;
+              case "> 25000":
+                return 11 * 2.5;
+              default:
+                return 0;
+            }
+          });
+
+        // Total steps per week labels
+        myChart
+          .selectAll(".total-steps-label")
+          .data(weekStepsArray)
+          .enter()
+          .append("text")
+          .attr("class", "total-steps-label")
+          .attr("x", 550) // Position closer to the grid
+          .attr("y", (d, i) => i * 70 + 35) // Align with week labels
+          .text(
+            (d) =>
+              `${d.TotalSteps.toString().replace(
+                /\B(?=(\d{3})+(?!\d))/g,
+                ","
+              )} steps`
+          )
+          .attr("font-family", "sans-serif")
+          .attr("font-size", "12px");
+
+        const tooltip = d3.select("#tooltip");
+
+        individualCharts
+          .on("mousemove", function (event, d) {
+            tooltip
+              .style("left", event.pageX + 10 + "px")
+              .style("top", event.pageY - 20 + "px")
+              .style("opacity", 1)
+              .text(
+                `${d.Schritte.toString().replace(
+                  /\B(?=(\d{3})+(?!\d))/g,
+                  ","
+                )} steps 🚶`
+              );
+          })
+          .on("mouseover", function () {
+            d3.select(this).attr("stroke", "#121212").attr("stroke-width", 2);
+          })
+          .on("mouseout", function () {
+            d3.select(this).attr("stroke", "none");
+            tooltip.style("opacity", 0);
+          });
       });
-
-      individualCharts
-        .attr("cx", (d, i) => ((i % 7) * (gridSize + gap)) + gridSize / 2 + weekOffset)
-        .attr("cy", d => weekYPos[d.Week])
-        .attr("r", d => {
-          switch (d.Category) {
-            case "0-2500": return 1 * 2.5;
-            case "2501-5000": return 2 * 2.5;
-            case "5001-7500": return 3 * 2.5;
-            case "7501-10000": return 4 * 2.5;
-            case "10001-12500": return 5 * 2.5;
-            case "12501-15000": return 6 * 2.5;
-            case "15001-17500": return 7 * 2.5;
-            case "17501-20000": return 8 * 2.5;
-            case "20001-22500": return 9 * 2.5;
-            case "22501-25000": return 10 * 2.5;
-            case "> 25000": return 11 * 2.5;
-            default: return 0;
-          }
-        })
-        .style("fill", d => {
-          const categoryIndex = [
-            "0-2500", "2501-5000", "5001-7500", "7501-10000",
-            "10001-12500", "12501-15000", "15001-17500", "17501-20000",
-            "20001-22500", "22501-25000", "> 25000"
-          ].indexOf(d.Category);
-          return yellowTones[categoryIndex];
-        });
-
-      // Total steps per week labels
-      myChart.selectAll(".total-steps-label")
-        .data(weekStepsArray)
-        .enter()
-        .append("text")
-        .attr("class", "total-steps-label")
-        .attr("x", 550)  // Position closer to the grid
-        .attr("y", (d, i) => i * 70 + 35)  // Align with week labels
-        .text(d => `${d.TotalSteps.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} steps`)
-        .attr("font-family", "sans-serif")
-        .attr("font-size", "12px");
-
-      const tooltip = d3.select("#tooltip");
-
-      individualCharts
-        .on("mousemove", function (event, d) {
-          tooltip
-            .style("left", event.pageX + 10 + "px")
-            .style("top", event.pageY - 20 + "px")
-            .style("opacity", 1)
-            .text(`${d.Schritte.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} steps 🚶`);
-        })
-        .on("mouseover", function () {
-          d3.select(this).attr("stroke", "#121212").attr("stroke-width", 2);
-        })
-        .on("mouseout", function () {
-          d3.select(this).attr("stroke", "none");
-          tooltip.style("opacity", 0);
-        });
-    });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
